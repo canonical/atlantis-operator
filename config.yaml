@@ -7,7 +7,7 @@ options:
     default: ""
     type: string
   site-name:
-    description: The name of the site. Defaults to deployed application name if not specified.
+    description: The full URL of the site, e.g. 'https://atlantis.internal'. Defaults to deployed application name if not specified.
     default: ""
     type: string
   gh-token:
