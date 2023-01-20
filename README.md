@@ -1,7 +1,13 @@
 # atlantis-operator
 
+This charm is still under active development.
+
 Currently this operator only supports GitHub. Support for GitLab, Bitbucket and Azure DevOps could be added in the
 future based on user requests.
+
+To deploy from charmhub:
+
+    juju deploy atlantis --channel=edge
 
 To run this locally:
 
