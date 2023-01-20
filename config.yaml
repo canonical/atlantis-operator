@@ -11,7 +11,7 @@ options:
     default: ""
     type: string
   gh-token:
-    description: GitHub token to use. Required.
+    description: GitHub (classic) token to use - requires 'repo' access. Required.
     default: ""
     type: string
   gh-user:
