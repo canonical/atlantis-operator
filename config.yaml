@@ -1,0 +1,33 @@
+options:
+  repo-allowlist:
+    description: |
+      An allowlist of repositories Atlantis will accept webhooks from, e.g. 'github.com/myorg/*'. See https://www.runatlantis.io/docs/server-configuration.html#repo-allowlist for more details.
+      
+      Required.
+    default: ""
+    type: string
+  site-name:
+    description: The name of the site. Defaults to deployed application name if not specified.
+    default: ""
+    type: string
+  gh-token:
+    description: GitHub token to use. Required.
+    default: ""
+    type: string
+  gh-user:
+    description: GitHub user to connect as. Required.
+    default: ""
+    type: string
+  additional-env-variables:
+    description: |
+      Any additional environment variables that should be specified, in JSON format.
+      
+      This may include things like a Vault address and token, or AWS credentials for storing backend state.
+
+      e.g. '{"VAULT_ADDR": "https://vault.internal", "VAULT_TOKEN": "s.sekrit"}'
+    default: ""
+    type: string
+  webhook-secret:
+    description: Webhook secret. Required.
+    default: ""
+    type: string
