@@ -32,7 +32,7 @@ class AtlantisOperatorCharm(CharmBase):
         self.ingress = IngressRequires(
             self,
             {
-                "service-hostname": self._site_name,
+                "service-hostname": self._ingress_hostname,
                 "service-name": self.app.name,
                 "service-port": ATLANTIS_PORT,
             },
@@ -69,7 +69,7 @@ class AtlantisOperatorCharm(CharmBase):
             event: Event indicating configuration has been changed.
         """
         # Fetch the new config value
-        self.ingress.update_config({"service-hostname": self._site_name})
+        self.ingress.update_config({"service-hostname": self._ingress_hostname})
 
         required_config = self._required_config()
         if required_config:
@@ -104,7 +104,18 @@ class AtlantisOperatorCharm(CharmBase):
         Returns:
             The site name as a string.
         """
-        return self.config["site-name"] or self.app.name
+        return self.config["site-name"] or f'http://{self.app.name}'
+
+    @property
+    def _ingress_hostname(self) -> str:
+        """Get the ingress hostname.
+
+        This strips the URL scheme from self._site_name.
+
+        Returns:
+            The ingress hostname to use as a string.
+        """
+        return "".join(self._site_name.split("://")[1:])
 
     def _required_config(self) -> list[str]:
         """Return a list of required config items that aren't set.

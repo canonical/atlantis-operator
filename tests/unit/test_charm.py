@@ -44,7 +44,7 @@ class TestCharm(unittest.TestCase):
                     "command": "atlantis server --port=4141",
                     "startup": "enabled",
                     "environment": {
-                        "ATLANTIS_ATLANTIS_URL": "atlantis",
+                        "ATLANTIS_ATLANTIS_URL": "http://atlantis",
                         "ATLANTIS_GH_TOKEN": "test",
                         "ATLANTIS_GH_USER": "test",
                         "ATLANTIS_GH_WEBHOOK_SECRET": "test",
