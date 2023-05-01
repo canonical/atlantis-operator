@@ -14,14 +14,18 @@ display-name: Atlantis
 summary: Terraform Pull Request Automation.
 
 description: |
-  A single sentence that says what the charm is, concisely and memorably.
+  A charm providing Terraform pull request automation using [Atlantis](https://www.runatlantis.io/).
 
-  A paragraph of one to three short sentences, that describe what the charm does.
+  When PRs are generated against a Terraform config repository this charm can be configured to listen for a webhook which then triggers it to run `terraform plan` and post that to the PR. Reviewers can then post a message that will trigger this service to apply the changes if appropriate.
 
-  A third paragraph that explains what need the charm meets.
+  Improve your Terraform workflow, making it easier for devops teams to collaborate on infrastructure changes.
 
-  Finally, a paragraph that describes whom the charm is useful for.
+  This charm is useful for teams wanting to automate their Terraform workflows.
 
+maintainers:
+  - launchpad.net/~canonical-is-devops
+issues: https://github.com/canonical/atlantis-operator/issues
+source: https://github.com/canonical/atlantis-operator
 assumes:
   - k8s-api
 
