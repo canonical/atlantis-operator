@@ -22,6 +22,8 @@ description: |
 
   This charm is useful for teams wanting to automate their Terraform workflows.
 
+maintainers:
+  - launchpad.net/~canonical-is-devops
 issues: https://github.com/canonical/atlantis-operator/issues
 source: https://github.com/canonical/atlantis-operator
 assumes:
