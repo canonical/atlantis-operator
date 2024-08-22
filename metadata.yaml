@@ -40,5 +40,5 @@ resources:
     upstream-source: ghcr.io/runatlantis/atlantis
 
 requires:
-  ingress:
-    interface: ingress
+  nginx-route:
+    interface: nginx-route

@@ -6,7 +6,7 @@
 import json
 import logging
 
-from charms.nginx_ingress_integrator.v0.ingress import IngressRequires
+from charms.nginx_ingress_integrator.v0.nginx_route import require_nginx_route
 from ops.charm import CharmBase, ConfigChangedEvent, PebbleReadyEvent
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
@@ -29,14 +29,7 @@ class AtlantisOperatorCharm(CharmBase):
         self.framework.observe(self.on.atlantis_pebble_ready, self._on_atlantis_pebble_ready)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
 
-        self.ingress = IngressRequires(
-            self,
-            {
-                "service-hostname": self._ingress_hostname,
-                "service-name": self.app.name,
-                "service-port": ATLANTIS_PORT,
-            },
-        )
+        self._require_nginx_route()
 
     #########################################################################
     # Juju event handlers
@@ -94,6 +87,15 @@ class AtlantisOperatorCharm(CharmBase):
     #########################################################################
     # Charm-specific functions and properties
     #########################################################################
+
+    def _require_nginx_route(self) -> None:
+        """Create minimal ingress configuration using nginx-route integration."""
+        require_nginx_route(
+            charm=self,
+            service_hostname=self.app.name,
+            service_name=self.app.name,
+            service_port=ATLANTIS_PORT
+        )
 
     @property
     def _site_name(self) -> str:
