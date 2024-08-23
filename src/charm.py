@@ -6,7 +6,7 @@
 import json
 import logging
 
-from charms.nginx_ingress_integrator.v0.nginx_route import require_nginx_route
+from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer
 from ops.charm import CharmBase, ConfigChangedEvent, PebbleReadyEvent
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
@@ -19,6 +19,8 @@ ATLANTIS_PORT = 4141
 class AtlantisOperatorCharm(CharmBase):
     """Charm for Atlantis on kubernetes."""
 
+    ingress = None
+
     def __init__(self, *args):
         """Init function for the charm.
 
@@ -29,7 +31,7 @@ class AtlantisOperatorCharm(CharmBase):
         self.framework.observe(self.on.atlantis_pebble_ready, self._on_atlantis_pebble_ready)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
 
-        self._require_nginx_route()
+        self.ingress = IngressPerAppRequirer(self, port=ATLANTIS_PORT)
 
     #########################################################################
     # Juju event handlers
@@ -41,10 +43,10 @@ class AtlantisOperatorCharm(CharmBase):
         Args:
             event: Event triggering the pebble ready hook for the atlantis container.
         """
-        required_config = self._required_config()
-        if required_config:
-            missing_config = ", ".join(required_config)
-            self.unit.status = BlockedStatus(f"Missing required config: {missing_config}")
+        required_data = self._required_data()
+        if required_data:
+            missing_data = ", ".join(required_data)
+            self.unit.status = BlockedStatus(f"Missing required config or integrations: {missing_data}")
             return
         # Get a reference the container attribute on the PebbleReadyEvent
         container = event.workload
@@ -61,13 +63,10 @@ class AtlantisOperatorCharm(CharmBase):
         Args:
             event: Event indicating configuration has been changed.
         """
-        # Fetch the new config value
-        self.ingress.update_config({"service-hostname": self._ingress_hostname})
-
-        required_config = self._required_config()
-        if required_config:
-            missing_config = ", ".join(required_config)
-            self.unit.status = BlockedStatus(f"Missing required config: {missing_config}")
+        required_data = self._required_data()
+        if required_data:
+            missing_data = ", ".join(required_data)
+            self.unit.status = BlockedStatus(f"Missing required config or integrations: {missing_data}")
             return
 
         # The config is good, so update the configuration of the workload
@@ -88,39 +87,8 @@ class AtlantisOperatorCharm(CharmBase):
     # Charm-specific functions and properties
     #########################################################################
 
-    def _require_nginx_route(self) -> None:
-        """Create minimal ingress configuration using nginx-route integration."""
-        require_nginx_route(
-            charm=self,
-            service_hostname=self.app.name,
-            service_name=self.app.name,
-            service_port=ATLANTIS_PORT
-        )
-
-    @property
-    def _site_name(self) -> str:
-        """Get the site_name property.
-
-        Defaults to deployed application name if not specified via juju config.
-
-        Returns:
-            The site name as a string.
-        """
-        return self.config["site-name"] or f'http://{self.app.name}'
-
-    @property
-    def _ingress_hostname(self) -> str:
-        """Get the ingress hostname.
-
-        This strips the URL scheme from self._site_name.
-
-        Returns:
-            The ingress hostname to use as a string.
-        """
-        return "".join(self._site_name.split("://")[1:])
-
-    def _required_config(self) -> list[str]:
-        """Return a list of required config items that aren't set.
+    def _required_data(self) -> list[str]:
+        """Return a list of required data that aren't set.
 
         Returns:
             A list of strings of the juju config options that are required but
@@ -132,7 +100,10 @@ class AtlantisOperatorCharm(CharmBase):
             "repo-allowlist",
             "webhook-secret",
         ]
-        return [x for x in required_config if not self.config[x]]
+        required_data = [x for x in required_config if not self.config[x]]
+        if not self.ingress.url:
+            required_data += ["ingress-url"]
+        return required_data
 
     def _env_variables(self) -> dict:
         """Assemble the environment variables that should be passed to Atlantis.
@@ -141,7 +112,7 @@ class AtlantisOperatorCharm(CharmBase):
             A dictionary of environment variables to be passed to Atlantis.
         """
         environment = {
-            "ATLANTIS_ATLANTIS_URL": self._site_name,
+            "ATLANTIS_ATLANTIS_URL": self.ingress.url,
             "ATLANTIS_GH_USER": self.config["gh-user"],
             "ATLANTIS_GH_TOKEN": self.config["gh-token"],
             "ATLANTIS_GH_WEBHOOK_SECRET": self.config["webhook-secret"],
