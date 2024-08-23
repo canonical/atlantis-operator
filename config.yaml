@@ -6,10 +6,6 @@ options:
       Required.
     default: ""
     type: string
-  site-name:
-    description: The full URL of the site, e.g. 'https://atlantis.internal'. Defaults to deployed application name if not specified.
-    default: ""
-    type: string
   gh-token:
     description: GitHub (classic) token to use - requires 'repo' access. Required.
     default: ""

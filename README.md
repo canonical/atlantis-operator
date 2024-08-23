@@ -21,7 +21,7 @@ You'll need to provide the following config options:
 * webhook-secret
 * repo-allowlist
 
-For ingress, the charm supports the nginx-route integration, provided by the nginx-ingress-integrator charm:
+The charm supports the ingress integration, provided by the nginx-ingress-integrator or traefik-k8s charms:
 
     juju deploy nginx-ingress-integrator --trust --config service-hostname=atlantis.local --config path-routes=/
     juju integrate nginx-ingress-integrator atlantis
