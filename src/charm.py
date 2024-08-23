@@ -6,7 +6,7 @@
 import json
 import logging
 
-from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer
+from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer, IngressPerAppReadyEvent
 from ops.charm import CharmBase, ConfigChangedEvent, PebbleReadyEvent
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
@@ -26,14 +26,20 @@ class AtlantisOperatorCharm(CharmBase):
             args: Variable list of positional arguments passed to the parent constructor.
         """
         super().__init__(*args)
+        self.ingress = IngressPerAppRequirer(self, port=ATLANTIS_PORT)
         self.framework.observe(self.on.atlantis_pebble_ready, self._on_atlantis_pebble_ready)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
-
-        self.ingress = IngressPerAppRequirer(self, port=ATLANTIS_PORT)
+        self.framework.observe(self.ingress.on.ready, self._on_ingress_ready)
 
     #########################################################################
     # Juju event handlers
     #########################################################################
+
+    def _on_ingress_ready(self, _) -> None:
+        """Handle the _on_ingress_ready event."""
+        # Trigger a config-changed which will check if we have the data we need
+        # and then configure Atlantis if appropriate.
+        self.on.config_changed.emit()
 
     def _on_atlantis_pebble_ready(self, event: PebbleReadyEvent) -> None:
         """Handle atlantis_pebble_ready event and configure workload container.
