@@ -19,8 +19,6 @@ ATLANTIS_PORT = 4141
 class AtlantisOperatorCharm(CharmBase):
     """Charm for Atlantis on kubernetes."""
 
-    ingress = None
-
     def __init__(self, *args):
         """Init function for the charm.
 
